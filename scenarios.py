@@ -3,52 +3,34 @@
 # money: Seçim sonucunda kazanılan/kaybedilen para (TL)
 # stage: Sahnenin geçtiği mekan
 
-daily_scenes = [
-    {
-        "stage": "Banyo (Sabah)",
-        "text": "Sabah uyandın, ellerini yıkayacaksın. Musluğu nasıl kullanırsın?",
-        "options": {
-            "Musluğu tam açarım, işim bitene kadar akar.": {"water": 12, "money": 0},
-            "Sadece ıslatırken açar, sabunlarken kapatırım.": {"water": 2, "money": 10},
-            "Sensörlü musluk varmış gibi çok kısa sürede hallederim.": {"water": 1, "money": 15}
-        }
-    },
-    {
-        "stage": "Mutfak (Kahvaltı)",
-        "text": "Kahvaltıdan sonra kirli tabağını nasıl temizlersin?",
-        "options": {
-            "Akan suyun altında uzunca durularım.": {"water": 20, "money": 0},
-            "Bulaşık makinesinin dolmasını beklerim.": {"water": 2, "money": 20},
-            "Az miktarda su dolu bir kapta çalkalarım.": {"water": 5, "money": 10}
-        }
-    },
-    {
-        "stage": "Okul (Tuvaletler)",
-        "text": "Okul tuvaletinde bir musluğun bozuk olduğunu ve su damlattığını gördün.",
-        "options": {
-            "Bana ne, okulun sorunu diyerek geçerim.": {"water": 50, "money": 0},
-            "Gidip hemen bir öğretmene veya görevliye haber veririm.": {"water": 0, "money": 40},
-            "Kendi imkanlarımla musluğu iyice sıkıştırmaya çalışırım.": {"water": 5, "money": 15}
-        }
-    },
-    {
-        "stage": "Bahçe (Sulama)",
-        "text": "Bahçedeki çiçeklerin sulanması gerekiyor. Hangi yöntemi seçersin?",
-        "options": {
-            "Hortumu açıp her yeri bolca sularım.": {"water": 100, "money": 0},
-            "Kovayla sadece bitki diplerine su dökerim.": {"water": 30, "money": 10},
-            "Yağmur suyu deposundaki birikmiş suyu kullanırım.": {"water": 0, "money": 30}
-        }
-    },
-    {
-        "stage": "Alışveriş (Tüketim)",
-        "text": "Yeni bir tişört almak istiyorsun ama evde benzerleri var. Su ayak izini düşünürsen?",
-        "options": {
-            "Modayı takip ederim, hemen alırım.": {"water": 2700, "money": -50},
-            "Almaktan vazgeçerim, olanları kullanırım.": {"water": 0, "money": 50},
-            "İkinci el veya sürdürülebilir bir ürün bakarım.": {"water": 500, "money": 20}
-        }
-    }
+daily_scenes = daily_scenes = [
+    # --- EV VE KİŞİSEL BAKIM (1-6) ---
+    {"stage": "Banyo", "text": "1. Diş fırçalarken musluğu açık bırakıyor musun?", "options": {"Evet": {"water": 12, "money": 0}, "Hayır": {"water": 2, "money": 10}}},
+    {"stage": "Banyo", "text": "2. Duş süren ortalama ne kadar?", "options": {"15 Dakika": {"water": 150, "money": 0}, "5 Dakika": {"water": 50, "money": 20}}},
+    {"stage": "Mutfak", "text": "3. Bulaşıkları elde mi yoksa makinede mi yıkarsın?", "options": {"Elde": {"water": 100, "money": 0}, "Makinede": {"water": 15, "money": 15}}},
+    {"stage": "Banyo", "text": "4. Sifonun sızdırdığını fark ettin, ne zaman tamir edersin?", "options": {"Hemen": {"water": 5, "money": -10}, "Haftaya": {"water": 200, "money": 0}}},
+    {"stage": "Mutfak", "text": "5. Sebzeleri akan su altında mı yoksa kapta mı yıkarsın?", "options": {"Akan Su": {"water": 15, "money": 0}, "Kapta": {"water": 3, "money": 10}}},
+    {"stage": "Banyo", "text": "6. Traş olurken/Yüz yıkarken musluk açık mı?", "options": {"Evet": {"water": 10, "money": 0}, "Hayır": {"water": 1, "money": 10}}},
+
+    # --- OKUL VE SOSYAL YAŞAM (7-11) ---
+    {"stage": "Okul", "text": "7. Okulda yarısı dolu su şişeni ne yaparsın?", "options": {"Dökerim": {"water": 0.5, "money": 0}, "Çiçeklere dökerim": {"water": 0, "money": 10}}},
+    {"stage": "Okul", "text": "8. Okul tuvaletinde açık kalmış musluk gördün?", "options": {"Kapatırım": {"water": 0, "money": 15}, "Geçer giderim": {"water": 20, "money": 0}}},
+    {"stage": "Spor", "text": "9. Spor sonrası çok terledin, nasıl temizlenirsin?", "options": {"Uzun banyo": {"water": 100, "money": 0}, "Hızlı duş": {"water": 30, "money": 10}}},
+    {"stage": "Okul", "text": "10. Arkadaşın su savaşı yapmayı teklif etti?", "options": {"Kabul ederim": {"water": 30, "money": -10}, "Reddederim": {"water": 0, "money": 20}}},
+    {"stage": "Kantin", "text": "11. İçecek alırken hangisini seçersin?", "options": {"Cam şişe (Geri dönüşümlü)": {"water": 1, "money": 5}, "Plastik şişe": {"water": 5, "money": 0}}},
+
+    # --- GİZLİ SU AYAK İZİ (12-16) ---
+    {"stage": "Yemek", "text": "12. Öğle yemeğinde ne yersin? (Üretimdeki su tüketimi)", "options": {"Hamburger": {"water": 2400, "money": 0}, "Sebze Yemeği": {"water": 200, "money": 10}}},
+    {"stage": "Giyim", "text": "13. İhtiyacın olmadığı halde yeni bir kot pantolon alır mısın?", "options": {"Evet": {"water": 8000, "money": -50}, "Hayır": {"water": 0, "money": 50}}},
+    {"stage": "Giyim", "text": "14. Bir tişört üretimi için kaç litre su harcanır biliyor musun?", "options": {"2700 Litre (Evet)": {"water": 0, "money": 20}, "Bilmiyorum (Hayır)": {"water": 10, "money": 0}}},
+    {"stage": "Teknoloji", "text": "15. Eski telefonun çalışıyor ama yenisini istiyorsun?", "options": {"Alırım": {"water": 12000, "money": -500}, "Eskisini kullanırım": {"water": 0, "money": 100}}},
+    {"stage": "Yemek", "text": "16. Kahve mi çay mı? (Su ayak izi farkı)", "options": {"Kahve": {"water": 140, "money": 0}, "Çay": {"water": 30, "money": 10}}},
+
+    # --- ÇEVRE VE BAHÇE (17-20) ---
+    {"stage": "Bahçe", "text": "17. Bahçeyi ne zaman sulamalıyız?", "options": {"Öğlen sıcağında": {"water": 100, "money": 0}, "Güneş battıktan sonra": {"water": 40, "money": 20}}},
+    {"stage": "Sokak", "text": "18. Arabayı hortumla mı yoksa kovayla mı yıkamalı?", "options": {"Hortum": {"water": 150, "money": 0}, "Kova": {"water": 20, "money": 20}}},
+    {"stage": "Çevre", "text": "19. Yağmur suyu toplama sistemi kurmak ister misin?", "options": {"Evet": {"water": -50, "money": -100}, "Hayır": {"water": 0, "money": 0}}},
+    {"stage": "Çevre", "text": "20. Yerel belediyeden su tasarrufu eğitimi talep eder misin?", "options": {"Evet": {"water": 0, "money": 50}, "Hayır": {"water": 0, "money": 0}}}
 ]
 
 # --- 2. MARKET SİSTEMİ (TEKNOLOJİK GELİŞTİRMELER) ---
@@ -85,3 +67,4 @@ info_cards = [
     "Dünya suyunun sadece %1'i erişilebilir tatlı sudur.",
     "Damlatan bir musluk günde 30 litreden fazla su israf edebilir."
 ]
+
