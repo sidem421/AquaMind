@@ -4,13 +4,42 @@ import matplotlib.pyplot as plt
 from database import init_db, update_or_add_student, get_leaderboard
 from scenarios import daily_scenes, market_items
 
-# Veritabanını sistem başladığında hazırla
+# Sayfa konfigürasyonu (Tarayıcı sekmesinde görünecek isim)
+st.set_page_config(page_title="AquaMind | Su Verimliliği", page_icon="💧", layout="centered")
+
+# Veritabanını başlat
 init_db()
 
-# --- SESSION STATE AYARLARI ---
+# --- CSS: DİNAMİK ARKA PLAN VE STİL ---
+def set_bg(url):
+    st.markdown(f"""
+        <style>
+        .stApp {{
+            background: linear-gradient(rgba(0,0,0,0.55), rgba(0,0,0,0.55)), url("{url}");
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+            transition: background-image 1s ease-in-out;
+        }}
+        /* İçerik kutusunu güzelleştirme */
+        .main-container {{
+            background: rgba(255, 255, 255, 0.92);
+            padding: 40px;
+            border-radius: 25px;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.3);
+            color: #1e1e1e;
+        }}
+        /* Metrik kartlarını özelleştirme */
+        [data-testid="stMetricValue"] {{
+            color: #0077b6;
+        }}
+        </style>
+    """, unsafe_allow_html=True)
+
+# --- SESSION STATE (HAFIZA) YÖNETİMİ ---
 if 'page' not in st.session_state:
     st.session_state.page = "login"
-if 'money' not in st.session_state:
+if 'current_scene' not in st.session_state:
     st.session_state.update({
         'user': "",
         'money': 100,
@@ -22,112 +51,98 @@ if 'money' not in st.session_state:
 
 # --- SAYFA 1: GİRİŞ EKRANI ---
 if st.session_state.page == "login":
-    st.title("💧 AquaMind: Su Yönetimi Simülasyonu")
-    st.markdown("### Liselerde Bilim Uygulamaları Projesi")
+    set_bg("https://images.unsplash.com/photo-1470071459604-3b5ec3a7fe05?q=80&w=1200")
+    st.title("🌊 AquaMind: Su Yönetimi")
+    st.markdown("### Geleceğin akışı senin kararlarında.")
     
-    tab1, tab2 = st.tabs(["Öğrenci Girişi", "Yönetici Paneli"])
-    
-    with tab1:
+    with st.container():
         u_name = st.text_input("Adın Soyadın / Okul No:", placeholder="Örn: Ahmet Yılmaz")
-        if st.button("Oyuna Başla"):
+        if st.button("Simülasyona Başla"):
             if u_name:
                 st.session_state.user = u_name
                 st.session_state.page = "game"
                 st.rerun()
             else:
-                st.warning("Lütfen giriş yapmak için isminizi yazın.")
+                st.warning("Devam etmek için bir isim girin.")
 
-    with tab2:
-        admin_pass = st.text_input("Yönetici Şifresi:", type="password")
-        if st.button("Yönetici Girişi"):
-            if admin_pass == "004380":
-                st.session_state.page = "admin"
-                st.rerun()
-            else:
-                st.error("Hatalı şifre!")
-
-# --- SAYFA 2: OYUN EKRANI ---
+# --- SAYFA 2: OYUN EKRANI (20 SORU) ---
 elif st.session_state.page == "game":
-    # Yan Panel (Sidebar) - Durum Göstergeleri
-    with st.sidebar:
-        st.header(f"👤 {st.session_state.user}")
-        st.metric("💰 Bakiye", f"{st.session_state.money} TL")
-        
-        # Su Barı Görselleştirme
-        st.write("### 💧 Su Tüketimi")
-        limit = 200
-        progress = min(st.session_state.water / limit, 1.0)
-        st.progress(progress)
-        st.caption(f"{st.session_state.water} L / {limit} L")
-        
-        st.write("---")
-        st.subheader("🛒 Market")
-        for item, info in market_items.items():
-            if item not in st.session_state.owned_items:
-                if st.button(f"{item} ({info['cost']} TL)"):
-                    if st.session_state.money >= info['cost']:
-                        st.session_state.money -= info['cost']
-                        st.session_state.owned_items.append(item)
-                        st.success(f"{item} Aktif!")
-                        st.rerun()
-            else:
-                st.info(f"✅ {item}")
-
-    # Ana Oyun Alanı
-    st.title("🌊 Günlük Kararlar")
-    
     if st.session_state.current_scene < len(daily_scenes):
         scene = daily_scenes[st.session_state.current_scene]
-        st.subheader(f"Mekan: {scene['stage']}")
-        st.write(scene['text'])
+        set_bg(scene['image']) # Her soruda değişen görsel
         
-        choice = st.radio("Ne yapmaya karar verdin?", list(scene['options'].keys()))
+        # Sidebar: Durum ve Market
+        with st.sidebar:
+            st.header(f"👤 {st.session_state.user}")
+            st.metric("💰 Bakiye", f"{st.session_state.money} TL")
+            st.metric("💧 Toplam Su", f"{st.session_state.water:.1f} L")
+            
+            st.write("---")
+            st.subheader("🛒 Market")
+            for item, info in market_items.items():
+                if item not in st.session_state.owned_items:
+                    if st.button(f"{item} ({info['cost']} TL)"):
+                        if st.session_state.money >= info['cost']:
+                            st.session_state.money -= info['cost']
+                            st.session_state.owned_items.append(item)
+                            st.success(f"{item} Alındı!")
+                            st.rerun()
+                else:
+                    st.info(f"✅ {item} (Aktif)")
+
+        # Ana Oyun Alanı
+        st.subheader(f"Soru {st.session_state.current_scene + 1} / 20")
+        st.info(f"📍 Mekan: {scene['stage']}")
+        st.write(f"### {scene['text']}")
         
-        if st.button("Kararı Uygula"):
+        choice = st.radio("Seçimin nedir?", list(scene['options'].keys()))
+        
+        if st.button("Kararı Uygula →"):
             res = scene['options'][choice]
             
-            # Tasarruf Sistemleri Kontrolü
-            harcanan = res['water']
-            if "Tasarruflu Musluk Başlığı" in st.session_state.owned_items and scene['stage'] == "Banyo":
-                harcanan *= 0.8
+            # Tasarruf katsayısı hesaplama
+            reduction = 1.0
+            if "Tasarruflu Musluk Başlığı" in st.session_state.owned_items and scene['stage'] in ["Banyo", "Mutfak"]:
+                reduction = 0.8
+            if "Damlama Sulama Sistemi" in st.session_state.owned_items and scene['stage'] == "Bahçe":
+                reduction = 0.4
             
-            st.session_state.water += harcanan
+            st.session_state.water += res['water'] * reduction
             st.session_state.money += res['money']
-            st.session_state.history.append(st.session_state.water)
             st.session_state.current_scene += 1
             st.rerun()
+            
     else:
-        st.success("🎉 Tebrikler! Tüm günlük kararları tamamladın.")
-        st.write(f"Toplam Harcanan Su: **{st.session_state.water:.1f} Litre**")
+        # FİNAL EKRANI
+        set_bg("https://images.unsplash.com/photo-1468421870903-4df1664ac249?q=80&w=1200")
+        st.balloons()
+        st.title("📊 Simülasyon Tamamlandı!")
+        st.write(f"Sayın **{st.session_state.user}**, tüm günlük kararlarını verdin.")
         
-        if st.button("Sonuçları Kaydet ve Bitir"):
+        col1, col2 = st.columns(2)
+        col1.metric("Toplam Harcanan Su", f"{st.session_state.water:.1f} Litre")
+        col2.metric("Kalan Bakiye", f"{st.session_state.money} TL")
+        
+        if st.button("Sonuçları Kaydet ve Sıralamayı Gör"):
             update_or_add_student(st.session_state.user, st.session_state.water, st.session_state.money, 100)
-            st.session_state.page = "login"
-            st.session_state.current_scene = 0 # Reset for next session
+            st.session_state.page = "admin"
             st.rerun()
 
-# --- SAYFA 3: ADMIN PANELİ ---
+# --- SAYFA 3: LİDERLİK TABLOSU ---
 elif st.session_state.page == "admin":
-    st.title("🔐 Yönetici Analiz Paneli")
-    if st.button("⬅ Ana Menüye Dön"):
-        st.session_state.page = "login"
-        st.rerun()
+    set_bg("https://images.unsplash.com/photo-1551288049-bebda4e38f71?q=80&w=1200")
+    st.title("🏆 Su Koruyucuları Sıralaması")
     
-    st.write("### 🏆 Öğrenci Sıralaması (En Az Su Tüketenler)")
     df = get_leaderboard()
-    
     if not df.empty:
         st.dataframe(df, use_container_width=True)
         
-        # Grafiksel Gösterim
-        st.write("### 📊 Tüketim Grafiği")
-        fig, ax = plt.subplots()
-        ax.bar(df["Öğrenci Adı"], df["Toplam Su (L)"], color='skyblue')
-        plt.xticks(rotation=45)
-        st.pyplot(fig)
-        
-        # Veri İndirme
-        csv = df.to_csv(index=False).encode('utf-8')
-        st.download_button("📥 Verileri CSV Olarak İndir", csv, "aquamind_sonuclar.csv", "text/csv")
-    else:
-        st.info("Henüz kaydedilmiş bir veri bulunmuyor.")
+        # Basit Grafik
+        st.write("### 📉 Su Tüketimi Dağılımı")
+        st.bar_chart(df.set_index("Öğrenci Adı")["Toplam Su (L)"])
+    
+    if st.button("Ana Menüye Dön"):
+        # Oyunu sıfırla
+        st.session_state.clear()
+        st.rerun()
+
